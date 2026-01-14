@@ -1,0 +1,138 @@
+Before:
+Style 1:
+{}^{0}T_{1}=
+\begin{bmatrix}
+\cos\theta_{1} & -\sin\theta_{1} & 0 & 0\\[6pt]
+\sin\theta_{1} & \cos\theta_{1} & 0 & 0\\[6pt]
+0 & 0 & 1 & 0\\[6pt]
+0 & 0 & 0 & 1
+\end{bmatrix}
+Style 2:
+$$
+{}^{0}T_{1}=
+\begin{bmatrix}
+\cos\theta_{1} & -\sin\theta_{1} & 0 & 0\\[6pt]
+\sin\theta_{1} & \cos\theta_{1} & 0 & 0\\[6pt]
+0 & 0 & 1 & 0\\[6pt]
+0 & 0 & 0 & 1
+\end{bmatrix}
+$$
+Style 3:
+\begin{equation}
+{}^{0}T_{1}=
+\begin{bmatrix}
+\cos\theta_{1} & -\sin\theta_{1} & 0 & 0\\[6pt]
+\sin\theta_{1} & \cos\theta_{1} & 0 & 0\\[6pt]
+0 & 0 & 1 & 0\\[6pt]
+0 & 0 & 0 & 1
+\end{bmatrix}
+\end{equation}
+
+
+After:
+<math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+  <msup>
+    <mrow data-mjx-texclass="ORD"></mrow>
+    <mrow data-mjx-texclass="ORD">
+      <mn>0</mn>
+    </mrow>
+  </msup>
+  <msub>
+    <mi>T</mi>
+    <mrow data-mjx-texclass="ORD">
+      <mn>1</mn>
+    </mrow>
+  </msub>
+  <mo>=</mo>
+  <mfenced open="[" close="]" separators="|">
+    <mrow>
+      <mtable columnspacing="1em" rowspacing="1em 1em 1em 0.4em">
+        <mtr>
+          <mtd>
+            <mi>cos</mi>
+            <mo data-mjx-texclass="NONE">⁡</mo>
+            <msub>
+              <mi>θ</mi>
+              <mrow data-mjx-texclass="ORD">
+                <mn>1</mn>
+              </mrow>
+            </msub>
+          </mtd>
+          <mtd>
+            <mo>−</mo>
+            <mi>sin</mi>
+            <mo data-mjx-texclass="NONE">⁡</mo>
+            <msub>
+              <mi>θ</mi>
+              <mrow data-mjx-texclass="ORD">
+                <mn>1</mn>
+              </mrow>
+            </msub>
+          </mtd>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+        </mtr>
+        <mtr>
+          <mtd>
+            <mi>sin</mi>
+            <mo data-mjx-texclass="NONE">⁡</mo>
+            <msub>
+              <mi>θ</mi>
+              <mrow data-mjx-texclass="ORD">
+                <mn>1</mn>
+              </mrow>
+            </msub>
+          </mtd>
+          <mtd>
+            <mi>cos</mi>
+            <mo data-mjx-texclass="NONE">⁡</mo>
+            <msub>
+              <mi>θ</mi>
+              <mrow data-mjx-texclass="ORD">
+                <mn>1</mn>
+              </mrow>
+            </msub>
+          </mtd>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+        </mtr>
+        <mtr>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+          <mtd>
+            <mn>1</mn>
+          </mtd>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+        </mtr>
+        <mtr>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+          <mtd>
+            <mn>0</mn>
+          </mtd>
+          <mtd>
+            <mn>1</mn>
+          </mtd>
+        </mtr>
+      </mtable>  
+    </mrow>  
+  </mfenced>
+</math>
