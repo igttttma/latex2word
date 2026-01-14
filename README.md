@@ -15,9 +15,8 @@
 
 下载地址（v1.0）：<https://github.com/igttttma/latex2word/releases/tag/v1.0>
 
-1. 在本项目 GitHub 的 Releases 页面，下载最新版本压缩包/安装包（内含 `latex2word.exe`）。
-2. 解压后直接运行 `latex2word.exe`。
-3. 开启“无感粘贴”后，在任意地方复制 LaTeX，回到 Word 粘贴即可。word将自动识别并生成含内容的公式框。
+1. 在本项目 GitHub 的 Releases 页面，下载 `latex2word.exe`。
+2. 开启“无感粘贴”后，在任意地方复制 LaTeX，回到 Word 粘贴即可。word将自动识别并生成含内容的公式框。
 
 说明：
 
@@ -27,7 +26,7 @@
 
 ## 推荐搭配：CopyTeX 浏览器插件（更稳定地复制 LaTeX）
 
-很多网页（例如论文站点/博客）展示的是渲染后的数学公式，直接复制往往会丢失 LaTeX 或变成乱码。CopyTeX 是一款浏览器插件，可以让你从网页公式中“直接复制 LaTeX”，再配合本程序的无感粘贴模式，能获得更稳定的一键粘贴体验。
+网页版AI（例如ChatGPT，Gemini等）展示的是渲染后的数学公式，直接复制可能会丢失 LaTeX 或变成乱码。CopyTeX 是一款浏览器插件，可以让你从网页公式中“直接复制 LaTeX”，再配合本程序的无感粘贴模式，能获得更稳定的一键粘贴体验。
 
 安装链接：
 
