@@ -17,7 +17,7 @@
 
 1. 在本项目 GitHub 的 Releases 页面，下载最新版本压缩包/安装包（内含 `latex2word.exe`）。
 2. 解压后直接运行 `latex2word.exe`。
-3. 开启“无感粘贴”后，在任意地方复制 LaTeX，回到 Word 公式框直接粘贴即可。
+3. 开启“无感粘贴”后，在任意地方复制 LaTeX，回到 Word 直接粘贴即可。word将自动识别并生成含内容的公式框。
 
 说明：
 
@@ -76,23 +76,6 @@ pyinstaller -F -w -n latex2word --clean --icon image/icon.ico --add-data "image/
 ```
 
 输出：`dist/latex2word.exe`
-
-## 使用方法（程序）
-
-### 手动输入
-
-1. 把 LaTeX 粘贴到“手动输入”文本框
-2. 点击“复制转换后结果”
-3. 到 Word 里粘贴
-
-### 无感粘贴（监听剪贴板）
-
-1. 勾选“开启无感粘贴”
-2. 在任意地方复制 LaTeX（例如论文、网页、编辑器）
-3. 程序检测到像 LaTeX 的内容后，会自动把剪贴板内容替换成 MathML
-4. 到 Word 里直接粘贴
-
-程序会显示一行预览，用于提示最近一次剪贴板内容的摘要。
 
 ## LaTeX 识别规则（无感粘贴）
 
