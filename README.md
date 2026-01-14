@@ -2,6 +2,8 @@
 
 一个在 Windows 上使用的 LaTeX → MathML 小工具：把 LaTeX 公式转换成 Word 更容易识别的 MathML，并支持“无感粘贴”（监听剪贴板，自动把 LaTeX 替换成 MathML）。
 
+![示例](image/example.png)
+
 ## 功能
 
 - 手动输入：粘贴/输入 LaTeX，点击按钮把转换结果复制到剪贴板
@@ -9,7 +11,7 @@
 - 托盘支持：可隐藏到托盘，通过托盘菜单快速操作
 - 转换输出：输出 MathML（`<math xmlns="http://www.w3.org/1998/Math/MathML">...`）
 
-## 二进制启动（推荐）
+## [二进制启动（推荐）](https://github.com/igttttma/latex2word/releases/tag/v1.0)
 
 1. 打开本项目 GitHub 的 Releases 页面，下载最新版本压缩包/安装包（内含 `latex2word.exe`）。
 2. 解压后直接运行 `latex2word.exe`。
@@ -119,14 +121,9 @@ pyinstaller -F -w -n latex2word --clean --icon image/icon.ico --add-data "image/
 
 ## 常见问题
 
-### 粘贴到 Word 后不是公式/显示为普通文本
-
-- 确认你是在“公式框”里粘贴（`Alt` + `=` 创建）
-- 确认剪贴板里的内容是 `<math xmlns="http://www.w3.org/1998/Math/MathML" ...>` 开头
-
 ### 无感粘贴会不会影响我复制普通文本？
 
-会尽量避免，但仍可能误判（例如某些文本包含 `_`、`^`、`\`）。如果你发现影响工作流，建议只在需要时开启无感粘贴。
+代码中已经尽量避免，但仍可能误判（例如某些文本包含 `_`、`^`、`\`）。如有影响，可在右下角托盘菜单中暂时关闭“无感粘贴”。
 
 ## License
 

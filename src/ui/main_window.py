@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import webbrowser
 from pathlib import Path
 import customtkinter as ctk
 
@@ -239,6 +240,24 @@ class MainWindow:
         )
         self._topmost_button.pack(side="left", padx=(14, 0))
 
+        footer = ctk.CTkFrame(outer, fg_color="transparent")
+        footer.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 6))
+        footer.grid_columnconfigure(0, weight=1)
+
+        footer_content = ctk.CTkFrame(footer, fg_color="transparent")
+        footer_content.grid(row=0, column=0)
+
+        ctk.CTkLabel(footer_content, text="by igttttma ", font=(font_family, 11)).pack(side="left")
+        link = ctk.CTkLabel(
+            footer_content,
+            text="项目主页",
+            font=(font_family, 11, "underline"),
+            text_color=("#1d4ed8", "#60a5fa"),
+            cursor="hand2",
+        )
+        link.pack(side="left")
+        link.bind("<Button-1>", lambda _event: self._open_project_homepage())
+
     def _on_copy_clicked(self) -> None:
         self._set_status("")
         latex = self._text.get("1.0", "end").strip()
@@ -258,6 +277,9 @@ class MainWindow:
 
     def _toggle_topmost(self) -> None:
         self._set_topmost_enabled(not self._topmost_enabled)
+
+    def _open_project_homepage(self) -> None:
+        webbrowser.open_new_tab("https://github.com/igttttma/latex2word")
 
     def _set_topmost_enabled(self, enabled: bool) -> None:
         enabled = bool(enabled)
