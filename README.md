@@ -11,9 +11,11 @@
 - 托盘支持：可隐藏到托盘，通过托盘菜单快速操作
 - 转换输出：输出 MathML（`<math xmlns="http://www.w3.org/1998/Math/MathML">...`）
 
-## [二进制启动（推荐）](https://github.com/igttttma/latex2word/releases/tag/v1.0)
+## 二进制启动（推荐）
 
-1. 打开本项目 GitHub 的 Releases 页面，下载最新版本压缩包/安装包（内含 `latex2word.exe`）。
+下载地址（v1.0）：<https://github.com/igttttma/latex2word/releases/tag/v1.0>
+
+1. 在本项目 GitHub 的 Releases 页面，下载最新版本压缩包/安装包（内含 `latex2word.exe`）。
 2. 解压后直接运行 `latex2word.exe`。
 3. 开启“无感粘贴”后，在任意地方复制 LaTeX，回到 Word 公式框直接粘贴即可。
 
