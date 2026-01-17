@@ -117,6 +117,8 @@ class ClipboardAutoPaster:
             return False
         if len(s) > 50000:
             return False
+        if "\\mathrm" in s:
+            return False
         if s.startswith("<math"):
             return False
         if 'xmlns="http://www.w3.org/1998/Math/MathML"' in s:
@@ -128,12 +130,43 @@ class ClipboardAutoPaster:
             return False
 
         if "$" in s:
+            if s.startswith("$$") or s.endswith("$$"):
+                if not (s.startswith("$$") and s.endswith("$$")):
+                    return False
+                inner = s[2:-2]
+                if not inner.strip():
+                    return False
+                if re.search(r"(?<!\\)\$", inner):
+                    return False
+                return True
+
+            if s.startswith("$") and s.endswith("$"):
+                inner = s[1:-1]
+                if not inner.strip():
+                    return False
+                if re.search(r"(?<!\\)\$", inner):
+                    return False
+                return True
+        has_tex_command = bool(re.search(r"\\[a-zA-Z]{2,}\b", s))
+        if has_tex_command:
             return True
-        if re.search(r"\\[a-zA-Z]{2,}\b", s):
+        has_structural_chars = any(ch in s for ch in ("{", "}", "\\\\", "&"))
+        if has_structural_chars:
             return True
-        if re.search(r"[_^](?:\{[^}]+\}|\w+)", s):
-            return True
-        if any(ch in s for ch in ("{", "}", "\\\\", "&")):
+        has_script = bool(re.search(r"[_^](?:\{[^}]+\}|\w+)", s))
+        if has_script:
+            if re.fullmatch(r"[A-Za-z0-9_]+", s) and s.count("_") >= 2:
+                return False
+            if len(s) <= 60:
+                return True
+            space_runs = len(re.findall(r"\s+", s))
+            has_sentence_punct = bool(re.search(r"[.?!;:。？！；：]", s))
+            if space_runs >= 12:
+                return False
+            if has_sentence_punct and space_runs >= 4:
+                return False
+            if len(s) >= 120 and space_runs >= 4:
+                return False
             return True
         return False
 

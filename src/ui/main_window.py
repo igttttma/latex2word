@@ -16,11 +16,6 @@ class MainWindow:
     def __init__(self) -> None:
         ctk.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
         ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
-        
-        # High DPI awareness is handled automatically by CustomTkinter, 
-        # but we can ensure scaling is correct
-        ctk.set_widget_scaling(1.0)
-        ctk.set_window_scaling(1.0)
 
         self._is_frozen = bool(getattr(sys, "frozen", False))
         self._start_silent = "--silent" in sys.argv[1:]
@@ -38,7 +33,7 @@ class MainWindow:
         self._close_behavior_var = ctk.StringVar(value="exit")
         self._autostart_var = ctk.StringVar(value="off")
         self._topmost_enabled = False
-        self._topmost_button: ctk.CTkButton | None = None
+        self._topmost_button: ctk.CTkSwitch | None = None
         self._auto_paster = ClipboardAutoPaster(
             root=self._root,
             get_clipboard_text=get_text,
@@ -84,175 +79,204 @@ class MainWindow:
         self._root.mainloop()
 
     def _build_ui(self) -> None:
-        # Use a modern font
         font_family = "Microsoft YaHei UI"
         
-        # Configure grid weight
         self._root.grid_columnconfigure(0, weight=1)
         self._root.grid_rowconfigure(0, weight=1)
 
-        outer = ctk.CTkFrame(self._root, corner_radius=10)
-        outer.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        outer = ctk.CTkFrame(self._root, fg_color="transparent")
+        outer.grid(row=0, column=0, sticky="nsew", padx=12, pady=12)
         outer.grid_columnconfigure(0, weight=1)
 
-        # Manual Input Section
-        manual = ctk.CTkFrame(outer, corner_radius=6)
-        manual.grid(row=0, column=0, sticky="ew", padx=10, pady=(10, 0))
+        card_color = ("white", "#2b2b2b")
+        card_border_color = ("#e5e5e5", "#3d3d3d")
+        card_border_width = 1
+        card_corner_radius = 10
+        section_padding = (0, 8)
+
+        manual = ctk.CTkFrame(
+            outer, 
+            fg_color=card_color, 
+            corner_radius=card_corner_radius,
+            border_width=card_border_width,
+            border_color=card_border_color
+        )
+        manual.grid(row=0, column=0, sticky="ew", padx=0, pady=section_padding)
         manual.grid_columnconfigure(0, weight=1)
         
-        manual_label = ctk.CTkLabel(manual, text="手动输入", font=(font_family, 12, "bold"))
-        manual_label.grid(row=0, column=0, sticky="w", padx=10, pady=(5, 0))
+        manual_label = ctk.CTkLabel(manual, text="手动输入", font=(font_family, 14, "bold"))
+        manual_label.grid(row=0, column=0, sticky="w", padx=12, pady=(10, 3))
 
         self._text = ctk.CTkTextbox(
             manual,
             width=300,
-            height=60,
+            height=56,
             font=(font_family, 12),
             wrap="word",
-            undo=True
+            undo=True,
+            fg_color=("gray98", "gray20"),
+            border_width=1,
+            border_color=("gray85", "gray30")
         )
-        self._text.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
+        self._text.grid(row=1, column=0, sticky="ew", padx=12, pady=6)
 
         manual_bottom = ctk.CTkFrame(manual, fg_color="transparent")
-        manual_bottom.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 10))
+        manual_bottom.grid(row=2, column=0, sticky="ew", padx=12, pady=(0, 10))
         manual_bottom.grid_columnconfigure(0, weight=1)
 
-        self._status_label = ctk.CTkLabel(manual_bottom, textvariable=self._status_var, font=(font_family, 12))
+        self._status_label = ctk.CTkLabel(manual_bottom, textvariable=self._status_var, font=(font_family, 12), text_color=("gray50", "gray70"))
         self._status_label.grid(row=0, column=0, sticky="w")
 
         copy_btn = ctk.CTkButton(
             manual_bottom, 
-            text="复制转换后结果", 
+            text="复制结果", 
             command=self._on_copy_clicked,
-            font=(font_family, 12)
+            font=(font_family, 12),
+            height=30,
+            corner_radius=8,
+            width=90,
         )
         copy_btn.grid(row=0, column=1, sticky="e")
 
-        # Auto Paste Section
-        auto = ctk.CTkFrame(outer, corner_radius=6)
-        auto.grid(row=1, column=0, sticky="ew", padx=10, pady=(10, 0))
+        auto = ctk.CTkFrame(
+            outer, 
+            fg_color=card_color, 
+            corner_radius=card_corner_radius,
+            border_width=card_border_width,
+            border_color=card_border_color
+        )
+        auto.grid(row=1, column=0, sticky="ew", padx=0, pady=section_padding)
         auto.grid_columnconfigure(0, weight=1)
         
-        auto_label = ctk.CTkLabel(auto, text="自动识别", font=(font_family, 12, "bold"))
-        auto_label.grid(row=0, column=0, sticky="w", padx=10, pady=(5, 0))
+        auto_header = ctk.CTkFrame(auto, fg_color="transparent")
+        auto_header.grid(row=0, column=0, sticky="ew", padx=12, pady=(10, 3))
+        auto_header.grid_columnconfigure(0, weight=1)
 
-        # Container for description and switch
-        auto_content = ctk.CTkFrame(auto, fg_color="transparent")
-        auto_content.grid(row=1, column=0, sticky="ew", padx=10, pady=(0, 5))
-        auto_content.grid_columnconfigure(0, weight=1) # Description takes available space
-        auto_content.grid_columnconfigure(1, weight=0) # Switch takes fixed space
-
-        desc = ctk.CTkLabel(
-            auto_content,
-            text="此模式下，程序将监听剪贴板，识别到公式时自动转换并写回，无需手动操作，直接粘贴即可。",
-            wraplength=200,
-            justify="left",
-            font=(font_family, 12)
-        )
-        desc.grid(row=0, column=0, sticky="nw")
+        auto_label = ctk.CTkLabel(auto_header, text="自动识别", font=(font_family, 14, "bold"))
+        auto_label.grid(row=0, column=0, sticky="w")
 
         self._auto_paste_check = ctk.CTkSwitch(
-            auto_content,
-            text="开启无感粘贴",
+            auto_header,
+            text="开启",
             variable=self._auto_paste_var,
             command=self._on_toggle_auto_paste,
             font=(font_family, 12),
-            width=50
+            width=50,
+            button_color="#3b8ed0",
+            progress_color="#3b8ed0"
         )
-        self._auto_paste_check.grid(row=0, column=1, sticky="w", padx=(10, 0))
+        self._auto_paste_check.grid(row=0, column=1, sticky="e")
+
+        desc = ctk.CTkLabel(
+            auto,
+            text="监听剪贴板，自动识别 LaTeX 公式并转换。",
+            wraplength=320,
+            justify="left",
+            font=(font_family, 12),
+            text_color=("gray40", "gray60")
+        )
+        desc.grid(row=1, column=0, sticky="w", padx=12, pady=(0, 6))
 
         preview = ctk.CTkEntry(
             auto, 
             textvariable=self._auto_paste_preview_var, 
             state="readonly", 
-            width=300,
-            font=(font_family, 12)
+            font=(font_family, 12),
+            height=30,
+            border_color=("gray85", "gray30"),
+            fg_color=("gray98", "gray20")
         )
-        preview.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+        preview.grid(row=2, column=0, sticky="ew", padx=12, pady=(0, 10))
 
-        # Settings Section
-        settings = ctk.CTkFrame(outer, corner_radius=6)
-        settings.grid(row=2, column=0, sticky="ew", padx=10, pady=10)
+        settings = ctk.CTkFrame(
+            outer, 
+            fg_color=card_color, 
+            corner_radius=card_corner_radius,
+            border_width=card_border_width,
+            border_color=card_border_color
+        )
+        settings.grid(row=2, column=0, sticky="ew", padx=0, pady=section_padding)
         settings.grid_columnconfigure(0, weight=1)
         
-        settings_label = ctk.CTkLabel(settings, text="程序设置", font=(font_family, 12, "bold"))
-        settings_label.grid(row=0, column=0, sticky="w", padx=10, pady=(5, 0))
+        settings_label = ctk.CTkLabel(settings, text="设置", font=(font_family, 14, "bold"))
+        settings_label.grid(row=0, column=0, sticky="w", padx=12, pady=(10, 6))
 
         row1 = ctk.CTkFrame(settings, fg_color="transparent")
-        row1.grid(row=1, column=0, sticky="ew", padx=10, pady=5)
+        row1.grid(row=1, column=0, sticky="ew", padx=12, pady=3)
         
         ctk.CTkLabel(row1, text="关闭窗口时", font=(font_family, 12)).pack(side="left")
+        
+        radio_style = {"font": (font_family, 12), "border_width_checked": 4, "border_width_unchecked": 2}
+        
         ctk.CTkRadioButton(
-            row1,
-            text="关闭程序",
-            value="exit",
-            variable=self._close_behavior_var,
-            command=self._persist_settings,
-            font=(font_family, 12)
-        ).pack(side="left", padx=(14, 0))
+            row1, text="退出程序", value="exit", variable=self._close_behavior_var,
+            command=self._persist_settings, **radio_style
+        ).pack(side="right", padx=(10, 0))
+        
         ctk.CTkRadioButton(
-            row1,
-            text="隐藏到托盘",
-            value="tray",
-            variable=self._close_behavior_var,
-            command=self._persist_settings,
-            font=(font_family, 12)
-        ).pack(side="left", padx=(14, 0))
+            row1, text="最小化到托盘", value="tray", variable=self._close_behavior_var,
+            command=self._persist_settings, **radio_style
+        ).pack(side="right", padx=(10, 0))
 
         row2 = ctk.CTkFrame(settings, fg_color="transparent")
-        row2.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 10))
-        
+        row2.grid(row=2, column=0, sticky="ew", padx=12, pady=3)
+
         ctk.CTkLabel(row2, text="开机自启", font=(font_family, 12)).pack(side="left")
-        self._autostart_on_radio = ctk.CTkRadioButton(
-            row2,
-            text="开",
-            value="on",
-            variable=self._autostart_var,
-            command=self._on_autostart_changed,
-            font=(font_family, 12)
-        )
-        self._autostart_on_radio.pack(side="left", padx=(14, 0))
-        self._autostart_off_radio = ctk.CTkRadioButton(
-            row2,
-            text="关",
-            value="off",
-            variable=self._autostart_var,
-            command=self._on_autostart_changed,
-            font=(font_family, 12)
-        )
-        self._autostart_off_radio.pack(side="left", padx=(14, 0))
-        
-        if not self._is_frozen:
-            self._autostart_var.set("off")
-            self._autostart_on_radio.configure(state="disabled")
-            self._autostart_off_radio.configure(state="disabled")
+
+        if self._is_frozen:
+            ctk.CTkRadioButton(
+                row2,
+                text="关",
+                value="off",
+                variable=self._autostart_var,
+                command=self._on_autostart_changed,
+                **radio_style,
+            ).pack(side="right", padx=(10, 0))
+
+            ctk.CTkRadioButton(
+                row2,
+                text="开",
+                value="on",
+                variable=self._autostart_var,
+                command=self._on_autostart_changed,
+                **radio_style,
+            ).pack(side="right", padx=(10, 0))
+        else:
+            ctk.CTkLabel(
+                row2,
+                text="开机自启仅对exe生效，当前为py启动",
+                font=(font_family, 12),
+                text_color=("gray50", "gray70"),
+            ).pack(side="right")
 
         row3 = ctk.CTkFrame(settings, fg_color="transparent")
-        row3.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 10))
+        row3.grid(row=3, column=0, sticky="ew", padx=12, pady=(3, 10))
 
-        ctk.CTkLabel(row3, text="窗口", font=(font_family, 12)).pack(side="left")
-        self._topmost_button = ctk.CTkButton(
+        ctk.CTkLabel(row3, text="窗口置顶", font=(font_family, 12)).pack(side="left")
+        self._topmost_button = ctk.CTkSwitch(
             row3,
-            text="置顶窗口",
+            text="",
             command=self._toggle_topmost,
             font=(font_family, 12),
-            width=90,
+            width=50,
+            onvalue=True,
+            offvalue=False
         )
-        self._topmost_button.pack(side="left", padx=(14, 0))
-
+        self._topmost_button.pack(side="right", padx=(0, 0))
+        
         footer = ctk.CTkFrame(outer, fg_color="transparent")
-        footer.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 6))
+        footer.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 2))
         footer.grid_columnconfigure(0, weight=1)
 
         footer_content = ctk.CTkFrame(footer, fg_color="transparent")
-        footer_content.grid(row=0, column=0)
+        footer_content.pack(expand=True)
 
-        ctk.CTkLabel(footer_content, text="by igttttma ", font=(font_family, 11)).pack(side="left")
+        ctk.CTkLabel(footer_content, text="By igttttma", font=(font_family, 11), text_color="gray60").pack(side="left", padx=(0, 5))
         link = ctk.CTkLabel(
             footer_content,
-            text="项目主页",
-            font=(font_family, 11, "underline"),
-            text_color=("#1d4ed8", "#60a5fa"),
+            text="GitHub",
+            font=(font_family, 11),
+            text_color=("#3b8ed0", "#60a5fa"),
             cursor="hand2",
         )
         link.pack(side="left")
@@ -276,7 +300,10 @@ class MainWindow:
         self._persist_settings()
 
     def _toggle_topmost(self) -> None:
-        self._set_topmost_enabled(not self._topmost_enabled)
+        btn = self._topmost_button
+        if btn is None:
+            return
+        self._set_topmost_enabled(bool(btn.get()))
 
     def _open_project_homepage(self) -> None:
         webbrowser.open_new_tab("https://github.com/igttttma/latex2word")
@@ -288,9 +315,15 @@ class MainWindow:
             self._root.attributes("-topmost", enabled)
         except Exception:
             pass
+        
         btn = self._topmost_button
         if btn is not None:
-            btn.configure(text="取消置顶" if enabled else "置顶窗口")
+            current = bool(btn.get())
+            if current != enabled:
+                if enabled:
+                    btn.select()
+                else:
+                    btn.deselect()
 
     def _set_status(self, text: str) -> None:
         self._status_var.set(text)
@@ -300,16 +333,17 @@ class MainWindow:
     def _center_window(self) -> None:
         self._root.update_idletasks()
 
-        default_width = 300
-        
-        req_width = self._root.winfo_reqwidth()
-        req_height = self._root.winfo_reqheight()
-        
-        w = max(req_width, default_width)
-        h = req_height
+        default_width = 380
+        default_height = 495
         
         sw = self._root.winfo_screenwidth()
         sh = self._root.winfo_screenheight()
+
+        w = default_width
+        h = default_height
+        w = min(w, max(320, sw - 80))
+        h = min(h, max(240, sh - 120))
+        
         x = max(0, (sw - w) // 2)
         y = max(0, (sh - h) // 2)
         self._root.geometry(f"{w}x{h}+{x}+{y}")
