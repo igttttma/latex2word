@@ -126,6 +126,9 @@ class TrayIcon:
 
     def _wnd_proc(self, hwnd, msg, wparam, lparam):
         if msg == TRAY_CALLBACK_MSG:
+            if lparam == WM_LBUTTONDBLCLK:
+                self._on_show()
+                return 0
             if lparam == WM_RBUTTONUP:
                 self._show_menu(hwnd)
                 return 0
@@ -148,7 +151,7 @@ class TrayIcon:
     def _ensure_winapi(self) -> None:
         global user32, kernel32, shell32
         global WNDCLASSW, WNDPROC, MSG, POINT, NOTIFYICONDATAW
-        global WM_COMMAND, WM_CLOSE, WM_RBUTTONUP, TRAY_CALLBACK_MSG
+        global WM_COMMAND, WM_CLOSE, WM_RBUTTONUP, WM_LBUTTONDBLCLK, TRAY_CALLBACK_MSG
         global NIF_MESSAGE, NIF_ICON, NIF_TIP, NIM_ADD, NIM_DELETE, IDI_APPLICATION
         global IMAGE_ICON, LR_LOADFROMFILE, LR_DEFAULTSIZE
         global MF_STRING, MF_SEPARATOR, TPM_RIGHTBUTTON
@@ -160,6 +163,7 @@ class TrayIcon:
         WM_COMMAND = 0x0111
         WM_CLOSE = 0x0010
         WM_RBUTTONUP = 0x0205
+        WM_LBUTTONDBLCLK = 0x0203
         TRAY_CALLBACK_MSG = 0x8001
 
         NIF_MESSAGE = 0x00000001
