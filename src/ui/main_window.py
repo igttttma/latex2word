@@ -34,6 +34,7 @@ class MainWindow:
         self._autostart_var = ctk.StringVar(value="off")
         self._topmost_enabled = False
         self._topmost_button: ctk.CTkSwitch | None = None
+        self._copytex_help_window: ctk.CTkToplevel | None = None
         self._auto_paster = ClipboardAutoPaster(
             root=self._root,
             get_clipboard_text=get_text,
@@ -94,6 +95,20 @@ class MainWindow:
         card_corner_radius = 10
         section_padding = (0, 8)
 
+        copy_help = ctk.CTkFrame(outer, fg_color="transparent")
+        copy_help.grid(row=0, column=0, sticky="ew", padx=0, pady=(0, 6))
+        copy_help.grid_columnconfigure(0, weight=1)
+
+        help_link = ctk.CTkLabel(
+            copy_help,
+            text="如何快速复制 AI 生成的数学公式？",
+            font=(font_family, 12),
+            text_color=("#3b8ed0", "#60a5fa"),
+            cursor="hand2",
+        )
+        help_link.grid(row=0, column=0, sticky="w")
+        help_link.bind("<Button-1>", lambda _event: self._open_copytex_help_window())
+
         manual = ctk.CTkFrame(
             outer, 
             fg_color=card_color, 
@@ -101,7 +116,7 @@ class MainWindow:
             border_width=card_border_width,
             border_color=card_border_color
         )
-        manual.grid(row=0, column=0, sticky="ew", padx=0, pady=section_padding)
+        manual.grid(row=1, column=0, sticky="ew", padx=0, pady=section_padding)
         manual.grid_columnconfigure(0, weight=1)
         
         manual_label = ctk.CTkLabel(manual, text="手动输入", font=(font_family, 14, "bold"))
@@ -129,7 +144,7 @@ class MainWindow:
 
         copy_btn = ctk.CTkButton(
             manual_bottom, 
-            text="复制结果", 
+            text="复制转换后结果", 
             command=self._on_copy_clicked,
             font=(font_family, 12),
             height=30,
@@ -145,7 +160,7 @@ class MainWindow:
             border_width=card_border_width,
             border_color=card_border_color
         )
-        auto.grid(row=1, column=0, sticky="ew", padx=0, pady=section_padding)
+        auto.grid(row=2, column=0, sticky="ew", padx=0, pady=section_padding)
         auto.grid_columnconfigure(0, weight=1)
         
         auto_header = ctk.CTkFrame(auto, fg_color="transparent")
@@ -157,7 +172,7 @@ class MainWindow:
 
         self._auto_paste_check = ctk.CTkSwitch(
             auto_header,
-            text="开启",
+            text="开启无感粘贴",
             variable=self._auto_paste_var,
             command=self._on_toggle_auto_paste,
             font=(font_family, 12),
@@ -195,7 +210,7 @@ class MainWindow:
             border_width=card_border_width,
             border_color=card_border_color
         )
-        settings.grid(row=2, column=0, sticky="ew", padx=0, pady=section_padding)
+        settings.grid(row=3, column=0, sticky="ew", padx=0, pady=section_padding)
         settings.grid_columnconfigure(0, weight=1)
         
         settings_label = ctk.CTkLabel(settings, text="设置", font=(font_family, 14, "bold"))
@@ -265,7 +280,7 @@ class MainWindow:
         self._topmost_button.pack(side="right", padx=(0, 0))
         
         footer = ctk.CTkFrame(outer, fg_color="transparent")
-        footer.grid(row=3, column=0, sticky="ew", padx=10, pady=(0, 2))
+        footer.grid(row=4, column=0, sticky="ew", padx=10, pady=(0, 0))
         footer.grid_columnconfigure(0, weight=1)
 
         footer_content = ctk.CTkFrame(footer, fg_color="transparent")
@@ -308,6 +323,173 @@ class MainWindow:
     def _open_project_homepage(self) -> None:
         webbrowser.open_new_tab("https://github.com/igttttma/latex2word")
 
+    def _open_copytex_help_window(self) -> None:
+        w0 = self._copytex_help_window
+        if w0 is not None and w0.winfo_exists():
+            w0.deiconify()
+            w0.lift()
+            try:
+                w0.focus_force()
+            except Exception:
+                pass
+            return
+
+        w = ctk.CTkToplevel(self._root)
+        w.title("如何快速复制 AI 生成的数学公式？")
+        w.resizable(False, False)
+        w.transient(self._root)
+        if sys.platform == "win32":
+            try:
+                w.iconbitmap(self._icon_ico_path)
+            except Exception:
+                pass
+        self._copytex_help_window = w
+        w.protocol("WM_DELETE_WINDOW", lambda: self._close_copytex_help_window())
+
+        outer = ctk.CTkFrame(w, fg_color="transparent")
+        outer.grid(row=0, column=0, sticky="nsew", padx=14, pady=14)
+        outer.grid_columnconfigure(0, weight=1)
+
+        font_family = "Microsoft YaHei UI"
+
+        scale = 1.0
+        try:
+            scale = float(self._root.winfo_fpixels("1i")) / 96.0
+        except Exception:
+            scale = 1.0
+        scale = max(0.8, min(scale, 2.5))
+
+        wrap_length_base = 520
+        wrap_length = int(wrap_length_base * scale)
+
+        help_text = "网页版AI（例如ChatGPT，Gemini等）展示的是渲染后的数学公式，直接复制可能会丢失 LaTeX 或变成乱码。CopyTeX 是一款浏览器插件，可以让你从网页公式中复制原始 LaTeX，再配合本程序的无感粘贴模式，能获得更稳定的一键粘贴体验。"
+
+        def estimate_lines(text: str, *, wrap_px: int, font_px: int) -> int:
+            lines = 1
+            current = 0.0
+            for ch in text:
+                if ch == "\n":
+                    lines += 1
+                    current = 0.0
+                    continue
+                if ch.isspace():
+                    w_ch = font_px * 0.33
+                elif ord(ch) < 128:
+                    w_ch = font_px * 0.6
+                else:
+                    w_ch = font_px * 0.95
+                if current + w_ch > wrap_px:
+                    lines += 1
+                    current = w_ch
+                else:
+                    current += w_ch
+            return max(1, lines)
+
+        para_lines = estimate_lines(help_text, wrap_px=wrap_length_base, font_px=12)
+        window_padding_base = 14
+        line_height_base = 18
+        section_gap_base = 14
+        header_gap_base = 8
+        header_height_base = 18
+        link_row_height_base = 28
+        link_row_gap_base = 6
+
+        w_width = int((wrap_length_base + 2 * window_padding_base) * scale)
+        w_height = int(
+            (
+                2 * window_padding_base
+                + para_lines * line_height_base
+                + section_gap_base
+                + header_height_base
+                + header_gap_base
+                + 3 * (link_row_height_base + link_row_gap_base)
+            )
+            * scale
+        )
+
+        ctk.CTkLabel(
+            outer,
+            text=help_text,
+            font=(font_family, 12),
+            justify="left",
+            wraplength=wrap_length,
+        ).grid(row=0, column=0, sticky="w", pady=(0, 14))
+
+        ctk.CTkLabel(
+            outer,
+            text="安装链接：",
+            font=(font_family, 12, "bold"),
+            justify="left",
+        ).grid(row=1, column=0, sticky="w", pady=(0, 8))
+
+        links = [
+            (
+                "Microsoft Edge",
+                "https://microsoftedge.microsoft.com/addons/detail/copytex-%E2%80%93-instantly-copy-/ibnmhabmikbofkccpglnippndpdepgmd",
+            ),
+            (
+                "Google Chrome",
+                "https://chromewebstore.google.com/detail/copytex-%E2%80%93-instantly-copy/dnkgkjeghbgobiflkonjgnfdejoeeocg",
+            ),
+            ("Mozilla Firefox", "https://addons.mozilla.org/en-US/firefox/addon/copytex/"),
+        ]
+
+        for i, (name, url) in enumerate(links):
+            row = 2 + i
+            link_row = ctk.CTkFrame(outer, fg_color="transparent")
+            link_row.grid(row=row, column=0, sticky="ew", pady=3)
+            link_row.grid_columnconfigure(1, weight=1)
+
+            ctk.CTkLabel(link_row, text=f"- {name}：", font=(font_family, 12)).grid(row=0, column=0, sticky="w")
+            link = ctk.CTkLabel(
+                link_row,
+                text="点击打开安装页面",
+                font=(font_family, 12),
+                text_color=("#3b8ed0", "#60a5fa"),
+                cursor="hand2",
+            )
+            link.grid(row=0, column=1, sticky="w")
+            link.bind("<Button-1>", lambda _event, u=url: webbrowser.open_new_tab(u))
+            ctk.CTkButton(
+                link_row,
+                text="复制链接",
+                command=lambda u=url: copy_text(u),
+                font=(font_family, 12),
+                height=28,
+                width=88,
+                corner_radius=8,
+            ).grid(row=0, column=2, sticky="e", padx=(12, 0))
+
+        sw = int(self._root.winfo_screenwidth())
+        sh = int(self._root.winfo_screenheight())
+        max_w = max(240, sw - int(40 * scale))
+        max_h = max(180, sh - int(80 * scale))
+        w_width = min(w_width, max_w)
+        w_height = min(w_height, max_h)
+
+        x = int(self._root.winfo_x() + (self._root.winfo_width() - w_width) // 2)
+        x = max(0, min(x, sw - w_width))
+
+        y = int(self._root.winfo_y() + (self._root.winfo_height() - w_height) // 2)
+        y = max(0, min(y, sh - w_height))
+
+        w.geometry(f"{w_width}x{w_height}+{x}+{y}")
+        w.lift()
+        try:
+            w.focus_force()
+        except Exception:
+            pass
+
+    def _close_copytex_help_window(self) -> None:
+        w = self._copytex_help_window
+        self._copytex_help_window = None
+        if w is None:
+            return
+        try:
+            w.destroy()
+        except Exception:
+            pass
+
     def _set_topmost_enabled(self, enabled: bool) -> None:
         enabled = bool(enabled)
         self._topmost_enabled = enabled
@@ -334,7 +516,7 @@ class MainWindow:
         self._root.update_idletasks()
 
         default_width = 380
-        default_height = 495
+        default_height = 530
         
         sw = self._root.winfo_screenwidth()
         sh = self._root.winfo_screenheight()
